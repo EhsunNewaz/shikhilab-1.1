@@ -1,0 +1,47 @@
+{
+  "name": "web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev --port 3000",
+    "lint": "next lint",
+    "start": "next start",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:performance": "jest __tests__/performance.test.js --runInBand",
+    "type-check": "tsc --noEmit",
+    "lighthouse": "lighthouse http://localhost:3000 --output=json --output=html --output-path=./lighthouse-results.json --chrome-flags=\"--headless\"",
+    "lighthouse:ci": "lhci autorun"
+  },
+  "dependencies": {
+    "next": "14.2.31",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "shared": "*",
+    "ui": "*"
+  },
+  "devDependencies": {
+    "@lhci/cli": "^0.12.0",
+    "@testing-library/jest-dom": "^6.4.2",
+    "@testing-library/react": "^14.2.1",
+    "@testing-library/user-event": "^14.5.2",
+    "@types/jest": "^29.5.12",
+    "@types/jest-axe": "^3.3.7",
+    "@types/node": "^20.11.1",
+    "@types/react": "^18.3.1",
+    "@types/react-dom": "^18.3.1",
+    "autoprefixer": "^10.4.18",
+    "chrome-launcher": "^0.15.2",
+    "config": "*",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "14.2.3",
+    "jest": "^29.7.0",
+    "jest-axe": "^8.0.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "lighthouse": "^12.8.1",
+    "postcss": "^8.4.35",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.4.5"
+  }
+}

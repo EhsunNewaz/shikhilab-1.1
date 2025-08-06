@@ -1,0 +1,30 @@
+{
+  "name": "shikhilb-ielts-platform",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "type-check": "turbo run type-check",
+    "clean": "turbo run clean"
+  },
+  "devDependencies": {
+    "turbo": "^1.13.3",
+    "typescript": "^5.4.5",
+    "@types/node": "^20.11.1",
+    "eslint": "^8.57.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "prettier": "^3.2.5"
+  },
+  "engines": {
+    "node": ">=20.11.1"
+  },
+  "packageManager": "npm@10.9.2"
+}
