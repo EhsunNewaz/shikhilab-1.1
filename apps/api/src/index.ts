@@ -2,7 +2,12 @@ import express from 'express'
 import cors from 'cors'
 import helmet from 'helmet'
 import morgan from 'morgan'
+import cookieParser from 'cookie-parser'
+import rateLimit from 'express-rate-limit'
 import { healthRouter } from './routes/health'
+import { enrollmentsRouter } from './enrollments/enrollments.routes'
+import { createAuthRoutes } from './auth'
+import db from './db'
 
 const app = express()
 const PORT = process.env.PORT || 3001
@@ -11,15 +16,51 @@ const PORT = process.env.PORT || 3001
 app.use(helmet())
 app.use(cors())
 
+// Rate limiting middleware
+const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: {
+    error: 'Too many requests',
+    message: 'Too many requests from this IP, please try again later.',
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+})
+
+const enrollmentLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000, // 5 minutes
+  max: 3, // limit each IP to 3 enrollment attempts per 5 minutes
+  message: {
+    error: 'Too many enrollment attempts',
+    message: 'Too many enrollment attempts from this IP, please wait 5 minutes before trying again.',
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipSuccessfulRequests: true, // Don't count successful requests
+})
+
+// Apply rate limiting only in production/development, not in tests
+if (process.env.NODE_ENV !== 'test') {
+  app.use(generalLimiter)
+}
+
 // Logging middleware
 app.use(morgan('combined'))
 
-// Body parsing middleware
-app.use(express.json())
-app.use(express.urlencoded({ extended: true }))
+// Body parsing middleware with size limits
+app.use(express.json({ limit: '10mb' }))
+app.use(express.urlencoded({ extended: true, limit: '10mb' }))
+app.use(cookieParser())
 
 // Routes
 app.use('/health', healthRouter)
+app.use('/auth', createAuthRoutes(db))
+if (process.env.NODE_ENV !== 'test') {
+  app.use('/enrollments', enrollmentLimiter, enrollmentsRouter)
+} else {
+  app.use('/enrollments', enrollmentsRouter)
+}
 
 // 404 handler
 app.use('*', (req, res) => {

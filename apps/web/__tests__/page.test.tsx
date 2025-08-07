@@ -4,6 +4,28 @@ import HomePage from '../app/page'
 
 expect.extend(toHaveNoViolations)
 
+// Mock navigator.onLine
+Object.defineProperty(navigator, 'onLine', {
+  writable: true,
+  value: true,
+})
+
+// Mock fetch
+const mockFetch = jest.fn()
+global.fetch = mockFetch
+
+beforeEach(() => {
+  mockFetch.mockClear()
+  // Mock capacity fetch
+  mockFetch.mockResolvedValue({
+    ok: true,
+    json: async () => ({
+      success: true,
+      data: { capacity: 25, current: 2, available: 23 }
+    })
+  })
+})
+
 describe('Home Page', () => {
   it('renders the main heading', () => {
     render(<HomePage />)
@@ -15,21 +37,22 @@ describe('Home Page', () => {
     expect(heading).toBeInTheDocument()
   })
 
-  it('renders the welcome message', () => {
+  it('renders the hero message', () => {
     render(<HomePage />)
     
-    const welcomeMessage = screen.getByText(
-      /welcome to your comprehensive ielts preparation platform/i
+    const heroMessage = screen.getByText(
+      /join our comprehensive ielts preparation course/i
     )
     
-    expect(welcomeMessage).toBeInTheDocument()
+    expect(heroMessage).toBeInTheDocument()
   })
 
   it('has proper semantic structure', () => {
     render(<HomePage />)
     
-    const container = screen.getByText(/ielts learning platform/i).closest('div')
-    expect(container).toHaveClass('container')
+    const heading = screen.getByRole('heading', { level: 1 })
+    expect(heading).toBeInTheDocument()
+    expect(heading).toHaveTextContent('IELTS Learning Platform')
   })
 
   it('should have no accessibility violations', async () => {
