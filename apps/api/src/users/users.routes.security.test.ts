@@ -30,7 +30,7 @@ describe('Users Routes - Security Tests', () => {
 
     beforeEach(() => {
       // Mock successful token consumption and password update
-      ;(mockDb.query as jest.Mock)
+      (mockDb.query as jest.Mock)
         .mockResolvedValueOnce({ // consumePasswordSetupToken query
           rows: [{
             email: 'test@example.com',
@@ -190,7 +190,7 @@ describe('Users Routes - Security Tests', () => {
 
     it('should accept strong passwords', async () => {
       // Mock successful database operations
-      ;(mockDb.query as jest.Mock)
+      (mockDb.query as jest.Mock)
         .mockResolvedValueOnce({ // Token validation
           rows: [{
             email: 'test@example.com',
@@ -222,7 +222,7 @@ describe('Users Routes - Security Tests', () => {
 
     it('should sanitize error responses', async () => {
       // Mock database error with sensitive information
-      ;(mockDb.query as jest.Mock)
+      (mockDb.query as jest.Mock)
         .mockRejectedValue(new Error('Database connection failed: host=db.internal.com user=admin password=secret123'))
 
       const response = await request(app)

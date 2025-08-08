@@ -22,7 +22,7 @@ export interface EmailResult {
 }
 
 export interface EmailProvider {
-  send(options: EmailOptions): Promise<EmailResult>
+  send(_options: EmailOptions): Promise<EmailResult>
   validateConnection(): Promise<boolean>
 }
 

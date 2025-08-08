@@ -1,4 +1,4 @@
-import { createGetProxy } from '../../../lib/api-proxy'
+import { createGetProxy } from '../../../../lib/api-proxy'
 
 // Use the reusable proxy utility with authentication required
 export const GET = createGetProxy('/admin/enrollments', { 

@@ -3,7 +3,6 @@ import express from 'express'
 import { Pool } from 'pg'
 import { createAdminRoutes } from './admin.routes'
 import { createAuthMiddleware, requireRole } from '../auth/auth.middleware'
-import { EmailService, MockEmailProvider } from '../email'
 
 // Mock the auth middleware
 jest.mock('../auth/auth.middleware')
@@ -67,7 +66,7 @@ describe('Admin Routes', () => {
     })
 
     it('should handle database errors', async () => {
-      ;(mockDb.query as jest.Mock).mockRejectedValue(new Error('Database error'))
+      (mockDb.query as jest.Mock).mockRejectedValue(new Error('Database error'))
 
       const response = await request(app)
         .get('/admin/enrollments')
@@ -189,7 +188,7 @@ describe('Admin Routes', () => {
   describe('Authentication and Authorization', () => {
     it('should require authentication', async () => {
       // Mock auth middleware to reject request
-      mockCreateAuthMiddleware.mockReturnValue((req: any, res: any, next: any) => {
+      mockCreateAuthMiddleware.mockReturnValue((req: any, res: any, _next: any) => {
         res.status(401).json({ success: false, error: 'Access token required' })
       })
 
@@ -206,7 +205,7 @@ describe('Admin Routes', () => {
     })
 
     it('should require admin role', async () => {
-      mockRequireRole.mockReturnValue((req: any, res: any, next: any) => {
+      mockRequireRole.mockReturnValue((req: any, res: any, _next: any) => {
         res.status(403).json({ success: false, error: 'Insufficient permissions' })
       })
 

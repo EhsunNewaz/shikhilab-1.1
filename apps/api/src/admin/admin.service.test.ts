@@ -1,6 +1,11 @@
 import { Pool } from 'pg'
 import { AdminService } from './admin.service'
 import { EmailService, MockEmailProvider } from '../email'
+import { UsersService } from '../users/users.service'
+
+// Mock the UsersService
+jest.mock('../users/users.service')
+const MockedUsersService = UsersService as jest.MockedClass<typeof UsersService>
 
 // Mock the database
 const mockDb = {
@@ -17,11 +22,20 @@ describe('AdminService', () => {
   let adminService: AdminService
   let emailService: EmailService
   let mockEmailProvider: MockEmailProvider
+  let mockUsersService: jest.Mocked<UsersService>
 
   beforeEach(() => {
     jest.clearAllMocks()
     mockEmailProvider = new MockEmailProvider()
     emailService = new EmailService(mockEmailProvider, 'test@example.com')
+    
+    // Mock UsersService
+    mockUsersService = {
+      createUser: jest.fn().mockResolvedValue({ id: 'new-user-id' }),
+      getUserByEmail: jest.fn().mockResolvedValue(null)
+    } as any
+    MockedUsersService.mockImplementation(() => mockUsersService)
+    
     adminService = new AdminService(mockDb, emailService)
     
     // Mock the connect method to return our mock client
@@ -50,7 +64,7 @@ describe('AdminService', () => {
     })
 
     it('should return empty array when no pending enrollments', async () => {
-      ;(mockDb.query as jest.Mock).mockResolvedValue({ rows: [] })
+      (mockDb.query as jest.Mock).mockResolvedValue({ rows: [] })
 
       const result = await adminService.getPendingEnrollments()
 
@@ -106,6 +120,25 @@ describe('AdminService', () => {
     }
 
     beforeEach(() => {
+      // Reset all mocks before each test
+      jest.clearAllMocks()
+      mockClient.query.mockReset()
+      
+      // Reset the UsersService mock
+      mockUsersService.createUser.mockReset().mockResolvedValue({ id: 'new-user-id' })
+      mockUsersService.getUserByEmail.mockReset().mockResolvedValue(null)
+      
+      // Reset email provider mock
+      jest.restoreAllMocks()
+      mockEmailProvider.send = jest.fn().mockResolvedValue({ success: true })
+      
+      // Mock capacity info to allow enrollment
+      jest.spyOn(adminService, 'getEnrollmentCapacityInfo').mockReset().mockResolvedValue({
+        total_capacity: 100,
+        current_enrollments: 50,
+        available_slots: 50
+      })
+      
       // Mock successful transaction flow
       mockClient.query
         .mockResolvedValueOnce(undefined) // BEGIN
@@ -142,12 +175,10 @@ describe('AdminService', () => {
     })
 
     it('should rollback transaction on user creation failure', async () => {
-      // Mock user creation failure
-      mockClient.query
-        .mockResolvedValueOnce(undefined) // BEGIN
-        .mockResolvedValueOnce({ rows: [mockEnrollment] }) // Get enrollment
-        .mockResolvedValueOnce({ rows: [] }) // Check existing user
-        .mockRejectedValueOnce(new Error('User creation failed'))
+      // Mock user service to throw error during user creation
+      mockUsersService.createUser.mockRejectedValueOnce(
+        new Error('User with this email already exists')
+      )
 
       const result = await adminService.approveEnrollment(enrollmentId)
 
@@ -157,15 +188,29 @@ describe('AdminService', () => {
     })
 
     it('should return error when enrollment not found', async () => {
-      mockClient.query
+      // Create fresh service instance for this test to avoid mock pollution
+      const freshEmailProvider = new MockEmailProvider()
+      const freshEmailService = new EmailService(freshEmailProvider, 'test@example.com')
+      const freshAdminService = new AdminService(mockDb, freshEmailService)
+      
+      // Clear and set up fresh mocks
+      const freshMockClient = {
+        query: jest.fn(),
+        release: jest.fn()
+      }
+      
+      ;(mockDb.connect as jest.Mock).mockResolvedValueOnce(freshMockClient)
+      
+      freshMockClient.query
         .mockResolvedValueOnce(undefined) // BEGIN
         .mockResolvedValueOnce({ rows: [] }) // Get enrollment (not found)
+        .mockResolvedValueOnce(undefined) // ROLLBACK
 
-      const result = await adminService.approveEnrollment(enrollmentId)
+      const result = await freshAdminService.approveEnrollment(enrollmentId)
 
       expect(result.success).toBe(false)
       expect(result.error).toBe('Enrollment not found or already processed')
-      expect(mockClient.query).toHaveBeenCalledWith('ROLLBACK')
+      expect(freshMockClient.query).toHaveBeenCalledWith('ROLLBACK')
     })
   })
 
@@ -192,7 +237,7 @@ describe('AdminService', () => {
     })
 
     it('should return error when enrollment not found', async () => {
-      ;(mockDb.query as jest.Mock).mockResolvedValueOnce({ rows: [] })
+      (mockDb.query as jest.Mock).mockResolvedValueOnce({ rows: [] })
 
       const result = await adminService.rejectEnrollment(enrollmentId)
 
@@ -232,7 +277,7 @@ describe('AdminService', () => {
     })
 
     it('should return error for invalid token', async () => {
-      ;(mockDb.query as jest.Mock).mockResolvedValue({ rows: [] })
+      (mockDb.query as jest.Mock).mockResolvedValue({ rows: [] })
 
       const result = await adminService.validatePasswordSetupToken('invalid-token')
 

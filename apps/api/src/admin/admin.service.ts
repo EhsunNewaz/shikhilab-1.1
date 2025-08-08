@@ -158,8 +158,8 @@ export class AdminService {
 
           await client.query('COMMIT')
 
-          // Send password setup email with resilient error handling
-          let emailResult = { success: false, error: 'Not attempted' }
+          // Send password setup email with resilient error handling  
+          let emailResult: { success: boolean; error?: string } = { success: false, error: 'Not attempted' }
           
           try {
             const setupUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/password-setup?token=${passwordToken}`
@@ -217,8 +217,7 @@ export class AdminService {
           return { 
             success: true, 
             passwordToken,
-            emailSent: emailResult.success,
-            emailError: emailResult.success ? undefined : emailResult.error
+            emailSent: emailResult.success
           }
         } catch (userCreationError) {
           await client.query('ROLLBACK')

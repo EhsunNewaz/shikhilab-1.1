@@ -31,7 +31,7 @@ function checkRateLimit(ip: string): boolean {
 
 export function createUsersRoutes(db: Pool): Router {
   const router = Router()
-  const usersService = new UsersService(db)
+  const _usersService = new UsersService(db)
   const adminService = new AdminService(db, {} as any) // Mock email service for now
 
   // POST /users/set-password - Public endpoint for password setup

@@ -201,7 +201,7 @@ describe('MockEmailProvider', () => {
 
   it('should simulate occasional failures', async () => {
     // Run multiple sends to test the 10% failure rate
-    const results: EmailResult[] = []
+    const _results: EmailResult[] = []
     
     // Mock Math.random to control failure simulation
     const originalRandom = Math.random
