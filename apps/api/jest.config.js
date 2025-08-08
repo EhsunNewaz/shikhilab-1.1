@@ -20,7 +20,26 @@ module.exports = {
     'lcov',
     'html'
   ],
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+  coverageThreshold: {
+    global: {
+      branches: 80,
+      functions: 80,
+      lines: 80,
+      statements: 80
+    }
+  },
+  
+  // --- BMad REVISIONS START HERE ---
+
+  // We are replacing your existing setup file with our new, more powerful one.
+  // If you have important setup logic in jest.setup.js, you should move it into test-setup.ts.
+  setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
+
+  // We are adding a timeout to allow Docker and the database to start.
+  testTimeout: 30000,
+
+  // --- BMad REVISIONS END HERE ---
+
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
   },

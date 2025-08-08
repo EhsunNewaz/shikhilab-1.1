@@ -1,5 +1,11 @@
 # IELTS Learning Platform
 
+[![CI](https://github.com/your-username/shikhilb-ielts-platform/workflows/CI/badge.svg)](https://github.com/your-username/shikhilb-ielts-platform/actions)
+[![codecov](https://codecov.io/gh/your-username/shikhilb-ielts-platform/branch/master/graph/badge.svg)](https://codecov.io/gh/your-username/shikhilb-ielts-platform)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.4.5-blue.svg)](https://www.typescriptlang.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-20.11.1-green.svg)](https://nodejs.org/)
+[![License](https://img.shields.io/badge/License-Private-red.svg)]()
+
 A comprehensive fullstack monorepo for IELTS preparation built with Next.js, Express.js, and TypeScript.
 
 ## 🏗️ Architecture
@@ -83,7 +89,61 @@ npm run start      # Start production server
 npm run lint       # Run ESLint
 npm run type-check # TypeScript type checking
 npm run test       # Run Jest tests
+
+# Database Migrations
+npm run migrate:up    # Apply all pending migrations
+npm run migrate:down  # Rollback the last migration
+npm run migrate:create <name>  # Create a new migration
+npm run seed          # Seed database with initial data
 ```
+
+## 🗄️ Database
+
+The project uses **Google Cloud SQL (PostgreSQL)** with automated migrations powered by `node-pg-migrate`.
+
+### Database Setup
+
+1. **Environment Configuration**: Copy the environment template and configure your database connection:
+   ```bash
+   cd apps/api
+   cp .env.example .env
+   # Edit .env with your database credentials
+   ```
+
+2. **Run Migrations**: Apply all database schema changes:
+   ```bash
+   cd apps/api
+   npm run migrate:up
+   ```
+
+3. **Seed Database**: Create initial data (admin user, etc.):
+   ```bash
+   cd apps/api
+   npm run seed
+   ```
+
+### Migration Commands
+
+```bash
+# Create a new migration
+npm run migrate:create create-users-table
+
+# Apply all pending migrations
+npm run migrate:up
+
+# Rollback the last migration
+npm run migrate:down
+
+# Rollback specific number of migrations
+npm run migrate:down 2
+```
+
+### Migration Best Practices
+
+- **Always test migrations**: Test both `up` and `down` operations
+- **Backup before production migrations**: Always backup production data
+- **Version control**: All migrations are version controlled and tracked
+- **No direct database changes**: Always use migrations for schema changes
 
 ## 🧪 Testing
 

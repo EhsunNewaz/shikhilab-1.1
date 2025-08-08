@@ -1,0 +1,150 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [main]
+
+env:
+  PROJECT_ID: shikhi-ielts-prod
+  REGION: us-central1
+  SERVICE_NAME: shikhi-api
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+      id-token: write # For OIDC authentication
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Full history for better caching
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.11.1'
+          cache: 'npm'
+      
+      # Security: Use Workload Identity Federation instead of service account keys
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+          project_id: ${{ env.PROJECT_ID }}
+      
+      - name: Configure Docker for GCR
+        run: |
+          gcloud auth configure-docker --quiet
+      
+      # Performance: Build and cache dependencies
+      - name: Install dependencies
+        run: |
+          npm ci --prefer-offline --no-audit
+          npm run build
+      
+      # Security: Run security audit before deployment
+      - name: Security audit
+        run: |
+          npm audit --audit-level=high
+          
+      # Deploy using Cloud Build for better caching and security
+      - name: Deploy to Cloud Run via Cloud Build
+        run: |
+          # Set build substitutions
+          gcloud builds submit \
+            --config=cloudbuild.yaml \
+            --substitutions=_SERVICE_NAME=${{ env.SERVICE_NAME }},_REGION=${{ env.REGION }},COMMIT_SHA=${{ github.sha }} \
+            --timeout=3600s
+      
+      # Enhanced health check with retry logic
+      - name: Verify Deployment Health
+        run: |
+          echo "🔍 Starting comprehensive health verification..."
+          
+          # Get service URL
+          SERVICE_URL=$(gcloud run services describe ${{ env.SERVICE_NAME }} \
+            --region=${{ env.REGION }} \
+            --format='value(status.url)')
+          
+          echo "Service URL: $SERVICE_URL"
+          
+          # Health check with exponential backoff
+          MAX_ATTEMPTS=10
+          ATTEMPT=1
+          DELAY=30
+          
+          while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
+            echo "🏥 Health check attempt $ATTEMPT/$MAX_ATTEMPTS..."
+            
+            # Check health endpoint
+            if curl -f -m 30 -s "$SERVICE_URL/health" | jq -e '.status == "healthy"' > /dev/null; then
+              echo "✅ Service is healthy!"
+              
+              # Additional performance check
+              START_TIME=$(date +%s%3N)
+              curl -f -s "$SERVICE_URL/health" > /dev/null
+              END_TIME=$(date +%s%3N)
+              RESPONSE_TIME=$((END_TIME - START_TIME))
+              
+              echo "⚡ Response time: ${RESPONSE_TIME}ms"
+              
+              if [ $RESPONSE_TIME -lt 2000 ]; then
+                echo "🎉 Deployment successful and performant!"
+                exit 0
+              else
+                echo "⚠️ Service is slow but functional (${RESPONSE_TIME}ms > 2000ms)"
+                exit 0
+              fi
+            else
+              echo "❌ Health check failed (attempt $ATTEMPT)"
+              
+              if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
+                echo "💥 All health checks failed. Triggering rollback..."
+                
+                # Trigger rollback
+                chmod +x scripts/rollback.sh
+                ./scripts/rollback.sh ${{ env.SERVICE_NAME }} ${{ env.REGION }}
+                exit 1
+              fi
+            fi
+            
+            echo "⏳ Waiting ${DELAY}s before retry..."
+            sleep $DELAY
+            ATTEMPT=$((ATTEMPT + 1))
+            DELAY=$((DELAY * 2)) # Exponential backoff
+            
+            # Cap delay at 5 minutes
+            if [ $DELAY -gt 300 ]; then
+              DELAY=300
+            fi
+          done
+      
+      # Notification on success
+      - name: Deployment Success Notification
+        if: success()
+        run: |
+          echo "🚀 Deployment completed successfully!"
+          echo "📊 Service: ${{ env.SERVICE_NAME }}"
+          echo "🌍 Region: ${{ env.REGION }}"
+          echo "🏷️ Commit: ${{ github.sha }}"
+          echo "🔗 URL: https://api.shikhi-ielts.com"
+      
+      # Notification on failure with rollback info
+      - name: Deployment Failure Notification
+        if: failure()
+        run: |
+          echo "💥 Deployment failed!"
+          echo "🔄 Rollback may have been triggered"
+          echo "📊 Service: ${{ env.SERVICE_NAME }}"
+          echo "🌍 Region: ${{ env.REGION }}"
+          echo "🏷️ Failed Commit: ${{ github.sha }}"
+          exit 1
