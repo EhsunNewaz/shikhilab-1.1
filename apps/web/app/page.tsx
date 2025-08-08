@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { EnrollmentForm } from '../components/EnrollmentForm'
 
 export default function HomePage() {
   const [showEnrollment, setShowEnrollment] = useState(false)
   const [isOnline, setIsOnline] = useState(true)
+  const enrollmentRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const updateOnlineStatus = () => setIsOnline(navigator.onLine)
@@ -18,6 +19,23 @@ export default function HomePage() {
       window.removeEventListener('offline', updateOnlineStatus)
     }
   }, [])
+
+  const handleEnrollmentToggle = () => {
+    if (!showEnrollment) {
+      // Show the form first
+      setShowEnrollment(true)
+      // Then scroll to it after a brief delay to allow the DOM to update
+      setTimeout(() => {
+        enrollmentRef.current?.scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'start'
+        })
+      }, 100)
+    } else {
+      // Just hide the form
+      setShowEnrollment(false)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -48,7 +66,7 @@ export default function HomePage() {
           )}
 
           <button
-            onClick={() => setShowEnrollment(!showEnrollment)}
+            onClick={handleEnrollmentToggle}
             disabled={!isOnline}
             className={`
               px-8 py-4 text-xl font-semibold rounded-lg transition-all duration-300
@@ -135,7 +153,7 @@ export default function HomePage() {
 
         {/* Enrollment Form */}
         {showEnrollment && (
-          <div className="bg-white rounded-xl shadow-lg p-8 md:p-12">
+          <div ref={enrollmentRef} className="bg-white rounded-xl shadow-lg p-8 md:p-12">
             <h3 className="text-3xl font-bold text-center mb-8 text-gray-900">Apply Now</h3>
             <EnrollmentForm />
           </div>

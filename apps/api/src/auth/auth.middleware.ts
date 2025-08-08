@@ -1,15 +1,15 @@
-import { Request, Response, NextFunction } from 'express'
+/* eslint-disable no-unused-vars */
+import type { Request, Response, NextFunction } from 'express'
 import { AuthService } from './auth.service'
 import { Pool } from 'pg'
 
-declare global {
-  namespace Express {
-    interface Request {
-      user?: {
-        userId: string
-        email: string
-        role: string
-      }
+// Extend Express Request interface
+declare module 'express-serve-static-core' {
+  interface Request {
+    user?: {
+      userId: string
+      email: string
+      role: string
     }
   }
 }

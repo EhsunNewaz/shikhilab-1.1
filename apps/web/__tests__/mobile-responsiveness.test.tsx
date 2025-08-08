@@ -1,26 +1,6 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, act } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import Home from '../app/page'
-
-// Mock window.matchMedia for responsive design testing
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: jest.fn().mockImplementation((query) => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: jest.fn(),
-    removeListener: jest.fn(),
-    addEventListener: jest.fn(),
-    removeEventListener: jest.fn(),
-    dispatchEvent: jest.fn(),
-  })),
-})
-
-// Mock navigator.onLine for offline testing
-Object.defineProperty(navigator, 'onLine', {
-  writable: true,
-  value: true,
-})
 
 describe('Mobile Responsiveness and PWA', () => {
   beforeEach(() => {
@@ -51,12 +31,15 @@ describe('Mobile Responsiveness and PWA', () => {
       expect(screen.getByText(/Personalized Approach/i)).toBeInTheDocument()
     })
 
-    it('renders payment instructions that are mobile-friendly', () => {
+    it('renders payment instructions that are mobile-friendly', async () => {
       render(<Home />)
 
       // First click "Enroll Now" to show the form
       const enrollButton = screen.getByRole('button', { name: /enroll now/i })
-      enrollButton.click()
+      
+      await act(async () => {
+        await userEvent.click(enrollButton)
+      })
 
       // Check payment instructions are visible
       expect(screen.getByText(/Payment Instructions/i)).toBeInTheDocument()
@@ -68,7 +51,10 @@ describe('Mobile Responsiveness and PWA', () => {
 
       // Show enrollment form
       const enrollButton = screen.getByRole('button', { name: /enroll now/i })
-      enrollButton.click()
+      
+      await act(async () => {
+        await userEvent.click(enrollButton)
+      })
 
       // Check form fields have proper labels and are accessible
       expect(screen.getByLabelText(/full name/i)).toBeInTheDocument()
@@ -123,8 +109,8 @@ describe('Mobile Responsiveness and PWA', () => {
       expect(enrollButton).not.toBeDisabled()
     })
 
-    it('handles online/offline state changes', () => {
-      const { rerender } = render(<Home />)
+    it('handles online/offline state changes', async () => {
+      render(<Home />)
 
       // Initially online
       let enrollButton = screen.getByRole('button', { name: /enroll now/i })
@@ -135,7 +121,10 @@ describe('Mobile Responsiveness and PWA', () => {
         value: false,
       })
 
-      rerender(<Home />)
+      // Fire the offline event
+      await act(async () => {
+        window.dispatchEvent(new Event('offline'))
+      })
 
       enrollButton = screen.getByRole('button', { name: /enroll now/i })
       expect(enrollButton).toBeDisabled()
@@ -178,8 +167,14 @@ describe('Mobile Responsiveness and PWA', () => {
   })
 
   describe('Content Organization and UX', () => {
-    it('presents information in logical order', () => {
+    it('presents information in logical order', async () => {
       render(<Home />)
+
+      // Show enrollment form to check full content order
+      const enrollButton = screen.getByRole('button', { name: /enroll now/i })
+      await act(async () => {
+        await userEvent.click(enrollButton)
+      })
 
       const content = document.body.textContent
       

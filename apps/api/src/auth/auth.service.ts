@@ -53,7 +53,7 @@ export class AuthService {
     const refreshToken = this.generateRefreshToken(user)
 
     // Remove password_hash from user object
-    const { password_hash, ...userWithoutPassword } = user
+    const { password_hash: _password_hash, ...userWithoutPassword } = user
 
     return {
       user: userWithoutPassword,
@@ -64,7 +64,7 @@ export class AuthService {
 
   async refreshAccessToken(refreshToken: string): Promise<string> {
     try {
-      const decoded = jwt.verify(refreshToken, this.jwtRefreshSecret) as any
+      const decoded = jwt.verify(refreshToken, this.jwtRefreshSecret as string) as any
       
       // Fetch fresh user data
       const query = 'SELECT * FROM users WHERE id = $1'
@@ -91,7 +91,7 @@ export class AuthService {
       role: user.role
     }
 
-    return jwt.sign(payload, this.jwtSecret, { expiresIn: this.jwtExpiry })
+    return jwt.sign(payload, this.jwtSecret as string, { expiresIn: this.jwtExpiry } as jwt.SignOptions)
   }
 
   private generateRefreshToken(user: User): string {
@@ -100,12 +100,12 @@ export class AuthService {
       email: user.email
     }
 
-    return jwt.sign(payload, this.jwtRefreshSecret, { expiresIn: this.jwtRefreshExpiry })
+    return jwt.sign(payload, this.jwtRefreshSecret as string, { expiresIn: this.jwtRefreshExpiry } as jwt.SignOptions)
   }
 
   verifyAccessToken(token: string): { userId: string; email: string; role: UserRole } {
     try {
-      const decoded = jwt.verify(token, this.jwtSecret) as any
+      const decoded = jwt.verify(token, this.jwtSecret as string) as any
       return {
         userId: decoded.userId,
         email: decoded.email,
