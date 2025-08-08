@@ -9,6 +9,8 @@ import { enrollmentsRouter } from './enrollments/enrollments.routes'
 import { createAuthRoutes } from './auth'
 import { createAdminRoutes } from './admin'
 import { createUsersRoutes } from './users/users.routes'
+import { CoursesService, createCoursesRouter, createAdminUsersRouter } from './courses'
+import { createAuthMiddleware, requireRole } from './auth/auth.middleware'
 import db from './db'
 
 const app = express()
@@ -55,11 +57,17 @@ app.use(express.json({ limit: '10mb' }))
 app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 app.use(cookieParser())
 
+// Initialize services
+const coursesService = new CoursesService(db)
+const authMiddleware = createAuthMiddleware(db)
+
 // Routes
 app.use('/health', healthRouter)
 app.use('/auth', createAuthRoutes(db))
 app.use('/admin', createAdminRoutes(db))
+app.use('/admin', authMiddleware, requireRole(['admin']), createAdminUsersRouter(coursesService))
 app.use('/users', createUsersRoutes(db))
+app.use('/courses', authMiddleware, requireRole(['admin']), createCoursesRouter(coursesService))
 if (process.env.NODE_ENV !== 'test') {
   app.use('/enrollments', enrollmentLimiter, enrollmentsRouter)
 } else {
