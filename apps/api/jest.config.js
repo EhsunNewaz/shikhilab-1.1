@@ -28,7 +28,18 @@ module.exports = {
       statements: 80
     }
   },
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+  
+  // --- BMad REVISIONS START HERE ---
+
+  // We are replacing your existing setup file with our new, more powerful one.
+  // If you have important setup logic in jest.setup.js, you should move it into test-setup.ts.
+  setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
+
+  // We are adding a timeout to allow Docker and the database to start.
+  testTimeout: 30000,
+
+  // --- BMad REVISIONS END HERE ---
+
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
   },
