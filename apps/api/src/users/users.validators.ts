@@ -14,4 +14,12 @@ export const createUserSchema = z.object({
   gamification_is_anonymous: z.boolean().default(false)
 })
 
+export const setPasswordSchema = z.object({
+  token: z.string().min(1, 'Token is required'),
+  password: z.string()
+    .min(8, 'Password must be at least 8 characters')
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'Password must contain at least one lowercase letter, one uppercase letter, and one number')
+})
+
 export type CreateUserRequest = z.infer<typeof createUserSchema>
+export type SetPasswordRequest = z.infer<typeof setPasswordSchema>

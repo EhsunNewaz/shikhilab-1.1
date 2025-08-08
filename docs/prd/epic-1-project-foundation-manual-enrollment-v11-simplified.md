@@ -31,9 +31,10 @@
         1.  A protected `/admin` route is created, accessible only to signed-in admins.
         2.  The panel displays the current enrollment count vs. the total capacity.
         3.  The panel displays a table of pending enrollments (Name, Email, TxID).
-        4.  Clicking an "Approve" button on a submission creates a new student user account, sends a password-setup email, and updates the application's status to "approved".
-        5.  The approved application is removed from the pending queue.
-        6.  Requires integration with a transactional email service (as per **NFR15**).
+        4.  Clicking an "Approve" button creates a new student user account, sends a password-setup email, and updates the application's status to "approved".
+        5.  Clicking a "Reject" button updates the application's status to "rejected".
+        6.  The approved or rejected application is removed from the pending queue.
+        7.  Requires integration with a transactional email service (as per **NFR15**).
 * **Story 1.5: Configure Foundational CI/CD Deployment**
     * **As a** Developer, **I want** to configure automated deployment pipelines for both frontend and backend applications, **so that** we have a reliable, automated deployment process to production environments.
     * **Acceptance Criteria:**

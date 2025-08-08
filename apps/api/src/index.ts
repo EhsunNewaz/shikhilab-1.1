@@ -7,6 +7,8 @@ import rateLimit from 'express-rate-limit'
 import { healthRouter } from './routes/health'
 import { enrollmentsRouter } from './enrollments/enrollments.routes'
 import { createAuthRoutes } from './auth'
+import { createAdminRoutes } from './admin'
+import { createUsersRoutes } from './users/users.routes'
 import db from './db'
 
 const app = express()
@@ -56,6 +58,8 @@ app.use(cookieParser())
 // Routes
 app.use('/health', healthRouter)
 app.use('/auth', createAuthRoutes(db))
+app.use('/admin', createAdminRoutes(db))
+app.use('/users', createUsersRoutes(db))
 if (process.env.NODE_ENV !== 'test') {
   app.use('/enrollments', enrollmentLimiter, enrollmentsRouter)
 } else {

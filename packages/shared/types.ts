@@ -67,3 +67,31 @@ export interface RefreshTokenResponse {
   success: boolean
   accessToken: string
 }
+
+export interface AdminEnrollmentView {
+  id: string
+  full_name: string
+  email: string
+  transaction_id: string
+  created_at: string
+  course_title: string
+}
+
+export interface EnrollmentCapacity {
+  total_capacity: number
+  current_approved: number
+  current_pending: number
+  available_slots: number
+}
+
+export interface PasswordSetupToken {
+  token: string
+  email: string
+  expires_at: string
+  created_at: string
+}
+
+export interface SetPasswordRequest {
+  token: string
+  password: string
+}
