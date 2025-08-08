@@ -11,7 +11,10 @@
       "Bash(git commit:*)",
       "Bash(git rm:*)",
       "Bash(git checkout:*)",
-      "mcp__ide__getDiagnostics"
+      "mcp__ide__getDiagnostics",
+      "Bash(npx eslint:*)",
+      "Bash(npx next:*)",
+      "Bash(chmod:*)"
     ],
     "deny": []
   }

@@ -1,5 +1,11 @@
 # IELTS Learning Platform
 
+[![CI](https://github.com/your-username/shikhilb-ielts-platform/workflows/CI/badge.svg)](https://github.com/your-username/shikhilb-ielts-platform/actions)
+[![codecov](https://codecov.io/gh/your-username/shikhilb-ielts-platform/branch/master/graph/badge.svg)](https://codecov.io/gh/your-username/shikhilb-ielts-platform)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.4.5-blue.svg)](https://www.typescriptlang.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-20.11.1-green.svg)](https://nodejs.org/)
+[![License](https://img.shields.io/badge/License-Private-red.svg)]()
+
 A comprehensive fullstack monorepo for IELTS preparation built with Next.js, Express.js, and TypeScript.
 
 ## 🏗️ Architecture
