@@ -15,7 +15,8 @@
       "Bash(npx eslint:*)",
       "Bash(npx next:*)",
       "Bash(chmod:*)",
-      "Bash(docker:*)"
+      "Bash(docker:*)",
+      "Bash(npx turbo test:*)"
     ],
     "deny": []
   }

@@ -89,7 +89,8 @@ describe('EnrollmentTable', () => {
 
     expect(screen.getByText('Approve Enrollment')).toBeInTheDocument()
     expect(screen.getByText(/Are you sure you want to approve the enrollment for/)).toBeInTheDocument()
-    expect(screen.getByText(/John Doe/)).toBeInTheDocument()
+    // Use more specific query to find John Doe within the dialog
+    expect(screen.getByText(/Are you sure you want to approve the enrollment for/).parentElement).toHaveTextContent('John Doe')
     expect(screen.getByText(/This will create a student account and send a password setup email/)).toBeInTheDocument()
   })
 
@@ -106,7 +107,8 @@ describe('EnrollmentTable', () => {
 
     expect(screen.getByText('Reject Enrollment')).toBeInTheDocument()
     expect(screen.getByText(/Are you sure you want to reject the enrollment for/)).toBeInTheDocument()
-    expect(screen.getByText(/John Doe/)).toBeInTheDocument()
+    // Use more specific query to find John Doe within the dialog
+    expect(screen.getByText(/Are you sure you want to reject the enrollment for/).parentElement).toHaveTextContent('John Doe')
   })
 
   it('handles successful approval action', async () => {
@@ -120,9 +122,16 @@ describe('EnrollmentTable', () => {
     const approveButtons = screen.getAllByText('Approve')
     fireEvent.click(approveButtons[0])
 
-    // Confirm the action
-    const confirmButton = screen.getByText('Approve')
-    fireEvent.click(confirmButton)
+    // Confirm the action - use more specific selector to get the confirm button in dialog
+    await waitFor(() => {
+      expect(screen.getByText('Approve Enrollment')).toBeInTheDocument()
+    })
+    
+    const confirmButtons = screen.getAllByText('Approve')
+    const confirmButton = confirmButtons.find(button => 
+      button.closest('.fixed') !== null // The dialog confirm button is within the fixed overlay
+    )
+    fireEvent.click(confirmButton!)
 
     await waitFor(() => {
       expect(mockFetch).toHaveBeenCalledWith(
@@ -154,9 +163,16 @@ describe('EnrollmentTable', () => {
     const rejectButtons = screen.getAllByText('Reject')
     fireEvent.click(rejectButtons[0])
 
-    // Confirm the action
-    const confirmButton = screen.getByText('Reject')
-    fireEvent.click(confirmButton)
+    // Confirm the action - use more specific selector to get the confirm button in dialog
+    await waitFor(() => {
+      expect(screen.getByText('Reject Enrollment')).toBeInTheDocument()
+    })
+    
+    const confirmButtons = screen.getAllByText('Reject')
+    const confirmButton = confirmButtons.find(button => 
+      button.closest('.fixed') !== null // The dialog confirm button is within the fixed overlay
+    )
+    fireEvent.click(confirmButton!)
 
     await waitFor(() => {
       expect(mockFetch).toHaveBeenCalledWith(
@@ -190,9 +206,16 @@ describe('EnrollmentTable', () => {
     const approveButtons = screen.getAllByText('Approve')
     fireEvent.click(approveButtons[0])
 
-    // Confirm the action
-    const confirmButton = screen.getByText('Approve')
-    fireEvent.click(confirmButton)
+    // Confirm the action - use more specific selector
+    await waitFor(() => {
+      expect(screen.getByText('Approve Enrollment')).toBeInTheDocument()
+    })
+    
+    const confirmButtons = screen.getAllByText('Approve')
+    const confirmButton = confirmButtons.find(button => 
+      button.closest('.fixed') !== null
+    )
+    fireEvent.click(confirmButton!)
 
     await waitFor(() => {
       expect(screen.getByText('Approving...')).toBeInTheDocument()
@@ -215,9 +238,16 @@ describe('EnrollmentTable', () => {
     const approveButtons = screen.getAllByText('Approve')
     fireEvent.click(approveButtons[0])
 
-    // Confirm the action
-    const confirmButton = screen.getByText('Approve')
-    fireEvent.click(confirmButton)
+    // Confirm the action - use more specific selector
+    await waitFor(() => {
+      expect(screen.getByText('Approve Enrollment')).toBeInTheDocument()
+    })
+    
+    const confirmButtons = screen.getAllByText('Approve')
+    const confirmButton = confirmButtons.find(button => 
+      button.closest('.fixed') !== null
+    )
+    fireEvent.click(confirmButton!)
 
     await waitFor(() => {
       expect(window.alert).toHaveBeenCalledWith('Failed to approve enrollment. Please try again.')
@@ -252,8 +282,9 @@ describe('EnrollmentTable', () => {
       />
     )
 
-    // Check that dates are formatted properly
-    expect(screen.getByText(/Jan 8, 2025/)).toBeInTheDocument()
+    // Check that dates are formatted properly in the table
+    const tableRows = screen.getByRole('table')
+    expect(tableRows).toHaveTextContent('Jan 8, 2025')
   })
 
   it('disables buttons during processing', async () => {
@@ -269,9 +300,16 @@ describe('EnrollmentTable', () => {
     const approveButtons = screen.getAllByText('Approve')
     fireEvent.click(approveButtons[0])
 
-    // Confirm the action
-    const confirmButton = screen.getByText('Approve')
-    fireEvent.click(confirmButton)
+    // Confirm the action - use more specific selector
+    await waitFor(() => {
+      expect(screen.getByText('Approve Enrollment')).toBeInTheDocument()
+    })
+    
+    const confirmButtons = screen.getAllByText('Approve')
+    const confirmButton = confirmButtons.find(button => 
+      button.closest('.fixed') !== null
+    )
+    fireEvent.click(confirmButton!)
 
     await waitFor(() => {
       const buttons = screen.getAllByRole('button')

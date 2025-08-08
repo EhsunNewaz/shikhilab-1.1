@@ -4,7 +4,6 @@ import {
   CreateCourseRequestSchema,
   UpdateCourseRequestSchema,
   CreateClassRequestSchema,
-  UpdateClassRequestSchema,
   CreateCourseEnrollmentRequestSchema,
   UUIDParamSchema 
 } from './courses.validators'
