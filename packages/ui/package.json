@@ -7,6 +7,9 @@
   "scripts": {
     "lint": "echo 'UI package - linting via TypeScript compilation'",
     "test": "jest",
+    "test:critical": "jest --testPathPattern=\"(Button|core)\\.test\\.(ts|tsx|js|jsx)$\" --passWithNoTests",
+    "test:integration": "jest --testPathPattern=\"(components|integration)\\.test\\.(ts|tsx|js|jsx)$\" --passWithNoTests",
+    "test:coverage": "jest --coverage --passWithNoTests",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {

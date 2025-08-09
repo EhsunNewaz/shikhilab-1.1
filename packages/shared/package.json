@@ -6,6 +6,10 @@
   "types": "./index.ts",
   "scripts": {
     "lint": "echo 'Shared package - linting via TypeScript compilation'",
+    "test": "echo 'Shared package - no tests configured'",
+    "test:critical": "echo 'Shared package - no critical tests'",
+    "test:integration": "echo 'Shared package - no integration tests'",
+    "test:coverage": "echo 'Shared package - no coverage tests'",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
