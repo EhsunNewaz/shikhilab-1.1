@@ -35,8 +35,23 @@ export default function CoursePage() {
   })
 
   useEffect(() => {
-    fetchCourses()
-    fetchStudents()
+    const loadData = async () => {
+      setState(prev => ({ ...prev, loading: true, error: null }))
+      
+      // Use allSettled to handle errors individually
+      const [coursesResult, studentsResult] = await Promise.allSettled([
+        fetchCourses(),
+        fetchStudents()
+      ])
+      
+      // Set loading to false after all operations complete
+      setState(prev => ({ 
+        ...prev, 
+        loading: false 
+      }))
+    }
+    
+    loadData()
   }, [])
 
   const fetchCourses = async () => {
@@ -85,7 +100,7 @@ export default function CoursePage() {
       console.error('Error fetching courses:', error)
       setState(prev => ({ 
         ...prev, 
-        error: error instanceof Error ? error.message : 'Failed to fetch courses' 
+        error: error instanceof Error ? error.message : 'Failed to fetch courses'
       }))
     }
   }
@@ -105,7 +120,10 @@ export default function CoursePage() {
       const data: ApiResponse<Omit<User, 'password_hash'>[]> = await response.json()
       
       if (data.success && data.data) {
-        setState(prev => ({ ...prev, students: data.data || [], loading: false }))
+        setState(prev => ({ 
+          ...prev, 
+          students: data.data || []
+        }))
       } else {
         throw new Error(data.error || 'Failed to fetch students')
       }
@@ -113,8 +131,7 @@ export default function CoursePage() {
       console.error('Error fetching students:', error)
       setState(prev => ({ 
         ...prev, 
-        error: error instanceof Error ? error.message : 'Failed to fetch students',
-        loading: false 
+        error: error instanceof Error ? error.message : 'Failed to fetch students'
       }))
     }
   }

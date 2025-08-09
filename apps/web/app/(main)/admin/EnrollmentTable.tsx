@@ -25,6 +25,7 @@ interface ActionState {
 
 export function EnrollmentTable({ enrollments, onEnrollmentAction }: EnrollmentTableProps) {
   const [actionStates, setActionStates] = useState<ActionState>({})
+  const [errorMessage, setErrorMessage] = useState<string>('')
   const [confirmDialog, setConfirmDialog] = useState<{
     isOpen: boolean
     enrollmentId: string
@@ -67,8 +68,9 @@ export function EnrollmentTable({ enrollments, onEnrollmentAction }: EnrollmentT
       
     } catch (error) {
       console.error(`Error ${action}ing enrollment:`, error)
-      // TODO: Add proper error handling with toast notifications
-      alert(`Failed to ${action} enrollment. Please try again.`)
+      setErrorMessage(`Failed to ${action} enrollment. Please try again.`)
+      // Auto-dismiss error after 5 seconds
+      setTimeout(() => setErrorMessage(''), 5000)
     } finally {
       // Clear loading state
       setActionStates(prev => {
@@ -107,6 +109,22 @@ export function EnrollmentTable({ enrollments, onEnrollmentAction }: EnrollmentT
 
   return (
     <>
+      {/* Error Message Toast */}
+      {errorMessage && (
+        <div className="fixed top-4 right-4 z-50 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded shadow-lg max-w-sm">
+          <div className="flex justify-between items-start">
+            <p className="text-sm">{errorMessage}</p>
+            <button 
+              onClick={() => setErrorMessage('')}
+              className="ml-2 text-red-700 hover:text-red-900 font-bold text-lg leading-none"
+              aria-label="Close error message"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
+      
       <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
         <table className="min-w-full divide-y divide-gray-300">
           <thead className="bg-gray-50">

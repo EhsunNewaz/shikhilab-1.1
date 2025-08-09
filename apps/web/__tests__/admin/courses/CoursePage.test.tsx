@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import CoursePage from '../../../app/(auth)/admin/courses/page'
 
@@ -165,7 +165,10 @@ describe('CoursePage', () => {
     })
 
     const createButton = screen.getByRole('button', { name: /create course/i })
-    await user.click(createButton)
+    
+    await act(async () => {
+      await user.click(createButton)
+    })
 
     expect(screen.getByTestId('course-form')).toBeInTheDocument()
   })
@@ -179,7 +182,10 @@ describe('CoursePage', () => {
     })
 
     const courseCard = screen.getByText('IELTS Preparation Course').closest('div')
-    await user.click(courseCard!)
+    
+    await act(async () => {
+      await user.click(courseCard!)
+    })
 
     expect(screen.getByText('Selected Course: IELTS Preparation Course')).toBeInTheDocument()
     expect(screen.getByText('Manage Classes')).toBeInTheDocument()
@@ -196,11 +202,17 @@ describe('CoursePage', () => {
 
     // Select course first
     const courseCard = screen.getByText('IELTS Preparation Course').closest('div')
-    await user.click(courseCard!)
+    
+    await act(async () => {
+      await user.click(courseCard!)
+    })
 
     // Click manage classes
     const manageClassesButton = screen.getByText('Manage Classes')
-    await user.click(manageClassesButton)
+    
+    await act(async () => {
+      await user.click(manageClassesButton)
+    })
 
     expect(screen.getByTestId('class-management')).toBeInTheDocument()
     expect(screen.getByText('Managing classes for IELTS Preparation Course')).toBeInTheDocument()
@@ -216,11 +228,17 @@ describe('CoursePage', () => {
 
     // Select course first
     const courseCard = screen.getByText('IELTS Preparation Course').closest('div')
-    await user.click(courseCard!)
+    
+    await act(async () => {
+      await user.click(courseCard!)
+    })
 
     // Click assign students
     const assignStudentsButton = screen.getByText('Assign Students')
-    await user.click(assignStudentsButton)
+    
+    await act(async () => {
+      await user.click(assignStudentsButton)
+    })
 
     expect(screen.getByTestId('enrollment-assignment')).toBeInTheDocument()
     expect(screen.getByText('Enrolling students for IELTS Preparation Course')).toBeInTheDocument()
@@ -237,11 +255,17 @@ describe('CoursePage', () => {
 
     // Open course form
     const createButton = screen.getByRole('button', { name: /create course/i })
-    await user.click(createButton)
+    
+    await act(async () => {
+      await user.click(createButton)
+    })
 
     // Simulate course creation
     const createCourseButton = screen.getByText('Create Course')
-    await user.click(createCourseButton)
+    
+    await act(async () => {
+      await user.click(createCourseButton)
+    })
 
     // Form should close and new course should be added
     await waitFor(() => {
@@ -259,11 +283,17 @@ describe('CoursePage', () => {
 
     // Open course form
     const createButton = screen.getByRole('button', { name: /create course/i })
-    await user.click(createButton)
+    
+    await act(async () => {
+      await user.click(createButton)
+    })
 
     // Close form
     const closeFormButton = screen.getByText('Close Form')
-    await user.click(closeFormButton)
+    
+    await act(async () => {
+      await user.click(closeFormButton)
+    })
 
     expect(screen.queryByTestId('course-form')).not.toBeInTheDocument()
   })
