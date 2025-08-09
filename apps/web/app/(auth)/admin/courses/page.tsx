@@ -307,7 +307,3 @@ export default function CoursePage() {
   )
 }
 
-export const metadata = {
-  title: 'Course Management - Admin Panel - Shikhi Lab IELTS',
-  description: 'Manage courses, classes, and student enrollments'
-}

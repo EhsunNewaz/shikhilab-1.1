@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Course, Class, ApiResponse } from 'shared'
 import { Button } from 'ui'
 
@@ -42,11 +42,7 @@ export function ClassManagement({ course, onClose }: ClassManagementProps) {
     editingClass: null,
   })
 
-  useEffect(() => {
-    fetchClasses()
-  }, [course.id])
-
-  const fetchClasses = async () => {
+  const fetchClasses = useCallback(async () => {
     try {
       setState(prev => ({ ...prev, loading: true, error: null }))
 
@@ -75,7 +71,11 @@ export function ClassManagement({ course, onClose }: ClassManagementProps) {
         loading: false,
       }))
     }
-  }
+  }, [course.id])
+
+  useEffect(() => {
+    fetchClasses()
+  }, [fetchClasses])
 
   const handleInputChange = (field: keyof ClassFormData, value: string | number) => {
     setState(prev => ({
@@ -423,7 +423,6 @@ export function ClassManagement({ course, onClose }: ClassManagementProps) {
                       {/* Form Actions */}
                       <div className="md:col-span-3 flex justify-end space-x-3 pt-4">
                         <Button
-                          type="button"
                           variant="outline"
                           onClick={resetForm}
                           disabled={state.formLoading}
@@ -431,7 +430,6 @@ export function ClassManagement({ course, onClose }: ClassManagementProps) {
                           Cancel
                         </Button>
                         <Button
-                          type="submit"
                           variant="primary"
                           disabled={state.formLoading}
                         >
@@ -455,7 +453,6 @@ export function ClassManagement({ course, onClose }: ClassManagementProps) {
           {/* Modal Footer */}
           <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
             <Button
-              type="button"
               variant="outline"
               onClick={onClose}
               className="mt-3 w-full sm:mt-0 sm:w-auto"

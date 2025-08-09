@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Course, CourseEnrollment, User, ApiResponse } from 'shared'
 import { Button } from 'ui'
 
@@ -39,11 +39,7 @@ export function EnrollmentAssignment({ course, students, onClose }: EnrollmentAs
     bulkEnrolling: false,
   })
 
-  useEffect(() => {
-    fetchEnrollments()
-  }, [course.id])
-
-  const fetchEnrollments = async () => {
+  const fetchEnrollments = useCallback(async () => {
     try {
       setState(prev => ({ ...prev, loading: true, error: null }))
 
@@ -95,7 +91,11 @@ export function EnrollmentAssignment({ course, students, onClose }: EnrollmentAs
         loading: false,
       }))
     }
-  }
+  }, [course.id, students])
+
+  useEffect(() => {
+    fetchEnrollments()
+  }, [fetchEnrollments])
 
   const handleEnrollStudent = async (studentId: string) => {
     setState(prev => ({ ...prev, enrolling: studentId }))
@@ -412,7 +412,6 @@ export function EnrollmentAssignment({ course, students, onClose }: EnrollmentAs
           {/* Modal Footer */}
           <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
             <Button
-              type="button"
               variant="outline"
               onClick={onClose}
               className="mt-3 w-full sm:mt-0 sm:w-auto"

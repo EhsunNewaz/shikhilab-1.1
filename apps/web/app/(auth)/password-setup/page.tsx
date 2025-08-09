@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 
 interface PasswordSetupState {
@@ -17,7 +17,7 @@ interface PasswordSetupState {
   }
 }
 
-export default function PasswordSetupPage() {
+function PasswordSetupContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const [state, setState] = useState<PasswordSetupState>({
@@ -339,5 +339,13 @@ export default function PasswordSetupPage() {
         </form>
       </div>
     </div>
+  )
+}
+
+export default function PasswordSetupPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>}>
+      <PasswordSetupContent />
+    </Suspense>
   )
 }

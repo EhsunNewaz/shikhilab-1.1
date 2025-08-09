@@ -235,7 +235,6 @@ export function CourseForm({ onClose, onCourseCreated }: CourseFormProps) {
             {/* Form Actions */}
             <div className="flex justify-end space-x-3 pt-4">
               <Button
-                type="button"
                 variant="outline"
                 onClick={onClose}
                 disabled={state.loading}
@@ -243,7 +242,6 @@ export function CourseForm({ onClose, onCourseCreated }: CourseFormProps) {
                 Cancel
               </Button>
               <Button
-                type="submit"
                 variant="primary"
                 disabled={state.loading}
               >
