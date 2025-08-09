@@ -26,9 +26,29 @@ export interface Enrollment {
 
 export interface Course {
   id: string
-  name: string
-  description: string
+  title: string
+  description: string | null
   capacity: number
+  created_at: string
+  updated_at: string
+  deleted_at?: string | null
+}
+
+export interface Class {
+  id: string
+  course_id: string
+  title: string
+  order_number: number
+  release_date: string | null
+  created_at: string
+  updated_at: string
+  deleted_at?: string | null
+}
+
+export interface CourseEnrollment {
+  user_id: string
+  course_id: string
+  enrolled_at: string
 }
 
 export interface User {

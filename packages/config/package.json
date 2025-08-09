@@ -3,6 +3,14 @@
   "version": "0.0.0",
   "private": true,
   "main": "index.js",
+  "scripts": {
+    "lint": "echo 'Config package - no linting needed'",
+    "test": "echo 'Config package - no tests configured'",
+    "test:critical": "echo 'Config package - no critical tests'",
+    "test:integration": "echo 'Config package - no integration tests'",
+    "test:coverage": "echo 'Config package - no coverage tests'",
+    "type-check": "echo 'Config package - no type checking needed'"
+  },
   "dependencies": {
     "@typescript-eslint/eslint-plugin": "^7.0.0",
     "@typescript-eslint/parser": "^7.0.0",

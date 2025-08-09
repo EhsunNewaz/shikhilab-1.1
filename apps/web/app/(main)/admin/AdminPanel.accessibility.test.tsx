@@ -7,8 +7,8 @@ import AdminPanel from './AdminPanel'
 expect.extend(toHaveNoViolations)
 
 // Mock the EnrollmentTable component
-jest.mock('./EnrollmentTable', () => {
-  return function MockEnrollmentTable({ enrollments }: any) {
+jest.mock('./EnrollmentTable', () => ({
+  EnrollmentTable: function MockEnrollmentTable({ enrollments }: any) {
     return (
       <div role="table" aria-label="Enrollment applications table">
         <div role="row">
@@ -33,7 +33,7 @@ jest.mock('./EnrollmentTable', () => {
       </div>
     )
   }
-})
+}))
 
 // Mock fetch
 global.fetch = jest.fn()

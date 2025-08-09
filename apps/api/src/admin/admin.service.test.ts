@@ -254,7 +254,11 @@ describe('AdminService', () => {
       const futureDate = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
       
       ;(mockDb.query as jest.Mock).mockResolvedValue({
-        rows: [{ email: 'john@example.com', expires_at: futureDate }]
+        rows: [{ 
+          email: 'john@example.com', 
+          expires_at: futureDate,
+          token: validToken  // Include the token field that the method expects
+        }]
       })
 
       const result = await adminService.validatePasswordSetupToken(validToken)
@@ -267,7 +271,13 @@ describe('AdminService', () => {
       const pastDate = new Date(Date.now() - 1000).toISOString()
       
       ;(mockDb.query as jest.Mock)
-        .mockResolvedValueOnce({ rows: [{ email: 'john@example.com', expires_at: pastDate }] })
+        .mockResolvedValueOnce({ 
+          rows: [{ 
+            email: 'john@example.com', 
+            expires_at: pastDate,
+            token: expiredToken  // Include the token field that the method expects
+          }] 
+        })
         .mockResolvedValueOnce(undefined) // Delete expired token
 
       const result = await adminService.validatePasswordSetupToken(expiredToken)
