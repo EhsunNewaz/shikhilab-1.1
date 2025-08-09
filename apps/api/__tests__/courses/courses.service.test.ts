@@ -167,6 +167,83 @@ describe('CoursesService', () => {
         expect(result).toEqual(updatedCourse)
       })
 
+      it('should update course with description', async () => {
+        const updatedCourse = { ...mockCourse, description: 'New description' }
+        mockDb.query.mockResolvedValueOnce({
+          rows: [updatedCourse],
+          rowCount: 1
+        } as any)
+
+        const result = await coursesService.updateCourse('course-uuid', {
+          description: 'New description'
+        })
+
+        expect(mockDb.query).toHaveBeenCalledWith(
+          expect.stringContaining('description = $1'),
+          ['New description', 'course-uuid']
+        )
+        expect(result).toEqual(updatedCourse)
+      })
+
+      it('should update course with capacity', async () => {
+        const updatedCourse = { ...mockCourse, capacity: 50 }
+        mockDb.query.mockResolvedValueOnce({
+          rows: [updatedCourse],
+          rowCount: 1
+        } as any)
+
+        const result = await coursesService.updateCourse('course-uuid', {
+          capacity: 50
+        })
+
+        expect(mockDb.query).toHaveBeenCalledWith(
+          expect.stringContaining('capacity = $1'),
+          [50, 'course-uuid']
+        )
+        expect(result).toEqual(updatedCourse)
+      })
+
+      it('should update course with all fields', async () => {
+        const updatedCourse = { 
+          ...mockCourse, 
+          title: 'New Title',
+          description: 'New description', 
+          capacity: 30 
+        }
+        mockDb.query.mockResolvedValueOnce({
+          rows: [updatedCourse],
+          rowCount: 1
+        } as any)
+
+        const result = await coursesService.updateCourse('course-uuid', {
+          title: 'New Title',
+          description: 'New description',
+          capacity: 30
+        })
+
+        expect(mockDb.query).toHaveBeenCalledWith(
+          expect.stringContaining('title = $1'),
+          ['New Title', 'New description', 30, 'course-uuid']
+        )
+        expect(result).toEqual(updatedCourse)
+      })
+
+      it('should return existing course when no updates provided', async () => {
+        // Mock getCourseById call
+        mockDb.query.mockResolvedValueOnce({
+          rows: [mockCourse],
+          rowCount: 1
+        } as any)
+
+        const result = await coursesService.updateCourse('course-uuid', {})
+
+        expect(result).toEqual(mockCourse)
+        expect(mockDb.query).not.toHaveBeenCalledWith(
+          expect.stringContaining('UPDATE courses'),
+          expect.any(Array)
+        )
+      })
+
       it('should return null when course not found', async () => {
         mockDb.query.mockResolvedValueOnce({
           rows: [],
@@ -294,6 +371,185 @@ describe('CoursesService', () => {
           ['course-uuid']
         )
         expect(result).toEqual([mockClass])
+      })
+    })
+
+    describe('getClassById', () => {
+      it('should return a class when found', async () => {
+        mockDb.query.mockResolvedValueOnce({
+          rows: [mockClass],
+          rowCount: 1
+        } as any)
+
+        const result = await coursesService.getClassById('class-uuid')
+
+        expect(mockDb.query).toHaveBeenCalledWith(
+          'SELECT * FROM classes WHERE id = $1 AND deleted_at IS NULL',
+          ['class-uuid']
+        )
+        expect(result).toEqual(mockClass)
+      })
+
+      it('should return null when class not found', async () => {
+        mockDb.query.mockResolvedValueOnce({
+          rows: [],
+          rowCount: 0
+        } as any)
+
+        const result = await coursesService.getClassById('nonexistent-uuid')
+
+        expect(result).toBeNull()
+      })
+    })
+
+    describe('updateClass', () => {
+      it('should update class successfully', async () => {
+        const updatedClass = { ...mockClass, title: 'Updated Class' }
+        
+        // Mock getClassById call
+        mockDb.query.mockResolvedValueOnce({
+          rows: [mockClass],
+          rowCount: 1
+        } as any)
+
+        // Mock the update query
+        mockDb.query.mockResolvedValueOnce({
+          rows: [updatedClass],
+          rowCount: 1
+        } as any)
+
+        const result = await coursesService.updateClass('class-uuid', {
+          title: 'Updated Class'
+        })
+
+        expect(result).toEqual(updatedClass)
+      })
+
+      it('should update class with order number change', async () => {
+        const updatedClass = { ...mockClass, order_number: 2 }
+        
+        // Mock getClassById call
+        mockDb.query.mockResolvedValueOnce({
+          rows: [mockClass],
+          rowCount: 1
+        } as any)
+
+        // Mock order number conflict check
+        mockDb.query.mockResolvedValueOnce({
+          rows: [],
+          rowCount: 0
+        } as any)
+
+        // Mock the update query
+        mockDb.query.mockResolvedValueOnce({
+          rows: [updatedClass],
+          rowCount: 1
+        } as any)
+
+        const result = await coursesService.updateClass('class-uuid', {
+          order_number: 2
+        })
+
+        expect(result).toEqual(updatedClass)
+      })
+
+      it('should return null when class not found', async () => {
+        // Mock getClassById call returning null
+        mockDb.query.mockResolvedValueOnce({
+          rows: [],
+          rowCount: 0
+        } as any)
+
+        const result = await coursesService.updateClass('nonexistent-uuid', {
+          title: 'Updated Class'
+        })
+
+        expect(result).toBeNull()
+      })
+
+      it('should update class with release date', async () => {
+        const updatedClass = { ...mockClass, release_date: '2025-03-01' }
+        
+        // Mock getClassById call
+        mockDb.query.mockResolvedValueOnce({
+          rows: [mockClass],
+          rowCount: 1
+        } as any)
+
+        // Mock the update query
+        mockDb.query.mockResolvedValueOnce({
+          rows: [updatedClass],
+          rowCount: 1
+        } as any)
+
+        const result = await coursesService.updateClass('class-uuid', {
+          release_date: '2025-03-01'
+        })
+
+        expect(result).toEqual(updatedClass)
+      })
+
+      it('should return existing class when no updates provided', async () => {
+        // Mock getClassById call
+        mockDb.query.mockResolvedValueOnce({
+          rows: [mockClass],
+          rowCount: 1
+        } as any)
+
+        const result = await coursesService.updateClass('class-uuid', {})
+
+        expect(result).toEqual(mockClass)
+        // Should not call update query
+        expect(mockDb.query).not.toHaveBeenCalledWith(
+          expect.stringContaining('UPDATE classes'),
+          expect.any(Array)
+        )
+      })
+
+      it('should throw error when order number conflicts', async () => {
+        // Mock getClassById call
+        mockDb.query.mockResolvedValueOnce({
+          rows: [mockClass],
+          rowCount: 1
+        } as any)
+
+        // Mock order number conflict check - returns existing class with same order
+        mockDb.query.mockResolvedValueOnce({
+          rows: [{ id: 'other-class-id' }],
+          rowCount: 1
+        } as any)
+
+        await expect(coursesService.updateClass('class-uuid', {
+          order_number: 2
+        })).rejects.toThrow('Order number already exists for this course')
+      })
+    })
+
+    describe('deleteClass', () => {
+      it('should delete class successfully', async () => {
+        mockDb.query.mockResolvedValueOnce({
+          rows: [],
+          rowCount: 1
+        } as any)
+
+        const result = await coursesService.deleteClass('class-uuid')
+
+        expect(mockDb.query).toHaveBeenCalledWith(
+          expect.stringContaining('UPDATE classes'),
+          ['class-uuid']
+        )
+        expect(result).toBe(true)
+      })
+
+      it('should return false when class not found', async () => {
+        mockDb.query.mockResolvedValueOnce({
+          rows: [],
+          rowCount: 0
+        } as any)
+
+        const result = await coursesService.deleteClass('nonexistent-uuid')
+
+        expect(result).toBe(false)
       })
     })
   })

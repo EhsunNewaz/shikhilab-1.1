@@ -183,11 +183,25 @@ describe('Courses API Routes', () => {
 
         expect(mockService.getCourses).toHaveBeenCalled()
       })
+
+      it('should handle service errors', async () => {
+        mockService.getCourses.mockRejectedValue(new Error('Database error'))
+
+        const response = await request(app)
+          .get('/courses')
+          .expect(500)
+
+        expect(response.body).toEqual({
+          success: false,
+          error: 'Internal server error',
+          message: 'Failed to fetch courses'
+        })
+      })
     })
 
     describe('GET /courses/:id', () => {
       it('should return a specific course', async () => {
-        mockService.getCourseById.mockResolvedValue(mockCourse)
+        mockService.getCourseWithStats.mockResolvedValue(mockCourse)
 
         const response = await request(app)
           .get('/courses/550e8400-e29b-41d4-a716-446655440000')
@@ -198,14 +212,14 @@ describe('Courses API Routes', () => {
           data: mockCourse
         })
 
-        expect(mockService.getCourseById).toHaveBeenCalledWith('550e8400-e29b-41d4-a716-446655440000')
+        expect(mockService.getCourseWithStats).toHaveBeenCalledWith('550e8400-e29b-41d4-a716-446655440000')
       })
 
       it('should return 404 when course not found', async () => {
-        mockService.getCourseById.mockResolvedValue(null)
+        mockService.getCourseWithStats.mockResolvedValue(null)
 
         const response = await request(app)
-          .get('/courses/nonexistent-uuid')
+          .get('/courses/550e8400-e29b-41d4-a716-446655440099')
           .expect(404)
 
         expect(response.body).toEqual({
@@ -231,7 +245,7 @@ describe('Courses API Routes', () => {
         mockService.updateCourse.mockResolvedValue(updatedCourse)
 
         const response = await request(app)
-          .put('/courses/course-uuid')
+          .put('/courses/550e8400-e29b-41d4-a716-446655440000')
           .send({ title: 'Updated Course' })
           .expect(200)
 
@@ -241,7 +255,7 @@ describe('Courses API Routes', () => {
           message: 'Course updated successfully'
         })
 
-        expect(mockService.updateCourse).toHaveBeenCalledWith('course-uuid', {
+        expect(mockService.updateCourse).toHaveBeenCalledWith('550e8400-e29b-41d4-a716-446655440000', {
           title: 'Updated Course'
         })
       })
@@ -250,7 +264,7 @@ describe('Courses API Routes', () => {
         mockService.updateCourse.mockResolvedValue(null)
 
         const response = await request(app)
-          .put('/courses/nonexistent-uuid')
+          .put('/courses/550e8400-e29b-41d4-a716-446655440099')
           .send({ title: 'Updated Course' })
           .expect(404)
 
@@ -267,7 +281,7 @@ describe('Courses API Routes', () => {
         mockService.deleteCourse.mockResolvedValue(true)
 
         const response = await request(app)
-          .delete('/courses/course-uuid')
+          .delete('/courses/550e8400-e29b-41d4-a716-446655440000')
           .expect(200)
 
         expect(response.body).toEqual({
@@ -275,14 +289,14 @@ describe('Courses API Routes', () => {
           message: 'Course deleted successfully'
         })
 
-        expect(mockService.deleteCourse).toHaveBeenCalledWith('course-uuid')
+        expect(mockService.deleteCourse).toHaveBeenCalledWith('550e8400-e29b-41d4-a716-446655440000')
       })
 
       it('should return 404 when course not found', async () => {
         mockService.deleteCourse.mockResolvedValue(false)
 
         const response = await request(app)
-          .delete('/courses/nonexistent-uuid')
+          .delete('/courses/550e8400-e29b-41d4-a716-446655440099')
           .expect(404)
 
         expect(response.body).toEqual({
@@ -300,11 +314,11 @@ describe('Courses API Routes', () => {
         mockService.createClass.mockResolvedValue(mockClass)
 
         const response = await request(app)
-          .post('/courses/course-uuid/classes')
+          .post('/courses/550e8400-e29b-41d4-a716-446655440000/classes')
           .send({
             title: 'Introduction to IELTS',
             order_number: 1,
-            release_date: '2024-02-01T00:00:00.000Z'
+            release_date: '2025-12-01T00:00:00.000Z'
           })
           .expect(201)
 
@@ -319,7 +333,7 @@ describe('Courses API Routes', () => {
         mockService.createClass.mockRejectedValue(new Error('Course not found'))
 
         const response = await request(app)
-          .post('/courses/nonexistent-uuid/classes')
+          .post('/courses/550e8400-e29b-41d4-a716-446655440099/classes')
           .send({
             title: 'Test Class',
             order_number: 1
@@ -337,7 +351,7 @@ describe('Courses API Routes', () => {
         mockService.createClass.mockRejectedValue(new Error('Order number already exists for this course'))
 
         const response = await request(app)
-          .post('/courses/course-uuid/classes')
+          .post('/courses/550e8400-e29b-41d4-a716-446655440000/classes')
           .send({
             title: 'Test Class',
             order_number: 1
@@ -358,7 +372,7 @@ describe('Courses API Routes', () => {
         mockService.getClassesByCourse.mockResolvedValue([mockClass])
 
         const response = await request(app)
-          .get('/courses/course-uuid/classes')
+          .get('/courses/550e8400-e29b-41d4-a716-446655440000/classes')
           .expect(200)
 
         expect(response.body).toEqual({
@@ -367,14 +381,14 @@ describe('Courses API Routes', () => {
           count: 1
         })
 
-        expect(mockService.getClassesByCourse).toHaveBeenCalledWith('course-uuid')
+        expect(mockService.getClassesByCourse).toHaveBeenCalledWith('550e8400-e29b-41d4-a716-446655440000')
       })
 
       it('should return 404 when course not found', async () => {
         mockService.getCourseById.mockResolvedValue(null)
 
         const response = await request(app)
-          .get('/courses/nonexistent-uuid/classes')
+          .get('/courses/550e8400-e29b-41d4-a716-446655440099/classes')
           .expect(404)
 
         expect(response.body).toEqual({
@@ -392,8 +406,8 @@ describe('Courses API Routes', () => {
         mockService.enrollUserInCourse.mockResolvedValue(mockEnrollment)
 
         const response = await request(app)
-          .post('/courses/course-uuid/enrollments')
-          .send({ user_id: 'user-uuid' })
+          .post('/courses/550e8400-e29b-41d4-a716-446655440000/enrollments')
+          .send({ user_id: '550e8400-e29b-41d4-a716-446655440002' })
           .expect(201)
 
         expect(response.body).toEqual({
@@ -402,15 +416,15 @@ describe('Courses API Routes', () => {
           message: 'Student enrolled successfully'
         })
 
-        expect(mockService.enrollUserInCourse).toHaveBeenCalledWith('course-uuid', 'user-uuid')
+        expect(mockService.enrollUserInCourse).toHaveBeenCalledWith('550e8400-e29b-41d4-a716-446655440000', '550e8400-e29b-41d4-a716-446655440002')
       })
 
       it('should return 409 when student already enrolled', async () => {
         mockService.enrollUserInCourse.mockRejectedValue(new Error('User is already enrolled in this course'))
 
         const response = await request(app)
-          .post('/courses/course-uuid/enrollments')
-          .send({ user_id: 'user-uuid' })
+          .post('/courses/550e8400-e29b-41d4-a716-446655440000/enrollments')
+          .send({ user_id: '550e8400-e29b-41d4-a716-446655440002' })
           .expect(409)
 
         expect(response.body).toEqual({
@@ -424,8 +438,8 @@ describe('Courses API Routes', () => {
         mockService.enrollUserInCourse.mockRejectedValue(new Error('Course has reached maximum capacity'))
 
         const response = await request(app)
-          .post('/courses/course-uuid/enrollments')
-          .send({ user_id: 'user-uuid' })
+          .post('/courses/550e8400-e29b-41d4-a716-446655440000/enrollments')
+          .send({ user_id: '550e8400-e29b-41d4-a716-446655440002' })
           .expect(409)
 
         expect(response.body).toEqual({
@@ -437,7 +451,7 @@ describe('Courses API Routes', () => {
 
       it('should return 400 for invalid user ID', async () => {
         const response = await request(app)
-          .post('/courses/course-uuid/enrollments')
+          .post('/courses/550e8400-e29b-41d4-a716-446655440000/enrollments')
           .send({ user_id: 'invalid-uuid' })
           .expect(400)
 
@@ -452,7 +466,7 @@ describe('Courses API Routes', () => {
         mockService.getCourseEnrollments.mockResolvedValue([mockEnrollment])
 
         const response = await request(app)
-          .get('/courses/course-uuid/enrollments')
+          .get('/courses/550e8400-e29b-41d4-a716-446655440000/enrollments')
           .expect(200)
 
         expect(response.body).toEqual({

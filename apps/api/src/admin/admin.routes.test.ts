@@ -93,15 +93,35 @@ describe('Admin Routes', () => {
         status: 'pending'
       }
 
-      // Mock successful transaction flow
+      // Mock successful transaction flow - need to handle both client and db queries
       mockClient.query
         .mockResolvedValueOnce(undefined) // BEGIN
         .mockResolvedValueOnce({ rows: [mockEnrollment] }) // Get enrollment
-        .mockResolvedValueOnce({ rows: [] }) // Check existing user
-        .mockResolvedValueOnce({ rows: [{ id: 'new-user-id' }] }) // Create user
+        .mockResolvedValueOnce({ rows: [] }) // Check existing user in enrollments table
         .mockResolvedValueOnce(undefined) // Update enrollment status
         .mockResolvedValueOnce(undefined) // Insert password token
         .mockResolvedValueOnce(undefined) // COMMIT
+
+      // Mock database calls that happen outside the transaction
+      mockDb.query
+        .mockResolvedValueOnce({ 
+          rows: [{ 
+            total_capacity: '50',
+            current_approved: '10', 
+            current_pending: '5'
+          }] 
+        }) // AdminService: Get capacity info
+        .mockResolvedValueOnce({ rows: [] }) // UsersService: Check existing user
+        .mockResolvedValueOnce({ 
+          rows: [{ 
+            id: 'new-user-id',
+            email: 'john@example.com',
+            full_name: 'John Doe',
+            role: 'student',
+            ai_credits: 500,
+            created_at: new Date()
+          }] 
+        }) // UsersService: Create user
 
       const response = await request(app)
         .patch(`/admin/enrollments/${enrollmentId}/approve`)
