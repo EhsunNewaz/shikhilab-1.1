@@ -54,7 +54,7 @@ export function EnrollmentTable({ enrollments, onEnrollmentAction }: EnrollmentT
         }
       })
 
-      if (!response.ok) {
+      if (!response || !response.ok) {
         throw new Error(`Failed to ${action} enrollment`)
       }
 

@@ -312,6 +312,15 @@ describe('CoursePage', () => {
           })
         })
       )
+      .mockImplementationOnce(() =>
+        Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({
+            success: true,
+            data: mockStudents
+          })
+        })
+      )
 
     renderCoursePage()
 
@@ -342,7 +351,15 @@ describe('CoursePage', () => {
   it('handles network errors', async () => {
     // Mock network error
     mockFetch.mockClear()
-    mockFetch.mockRejectedValueOnce(new Error('Network error'))
+    mockFetch
+      .mockRejectedValueOnce(new Error('Network error'))
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          success: true,
+          data: mockStudents
+        })
+      })
 
     renderCoursePage()
 

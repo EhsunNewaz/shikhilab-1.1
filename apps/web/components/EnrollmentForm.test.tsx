@@ -124,7 +124,7 @@ describe('EnrollmentForm', () => {
     })
   })
 
-  it.skip('validates email format', async () => {
+  it('validates email format', async () => {
     const user = userEvent.setup()
     
     // Reset mocks for clean test
@@ -146,18 +146,14 @@ describe('EnrollmentForm', () => {
     const transactionInput = screen.getByLabelText(/bKash transaction id/i)
     const submitButton = screen.getByRole('button', { name: /submit application/i })
 
-    // Fill form with an email that Zod will definitely reject
-    await act(async () => {
-      await user.type(nameInput, 'Test User')
-      await user.clear(emailInput)
-      await user.type(emailInput, 'just-plain-text')  // No @ or domain
-      await user.type(transactionInput, 'TXN123')
-    })
+    // Fill form with an email that Zod will definitely reject - userEvent already handles act()
+    await user.type(nameInput, 'Test User')
+    await user.clear(emailInput)
+    await user.type(emailInput, 'just-plain-text')  // No @ or domain
+    await user.type(transactionInput, 'TXN123')
     
-    // Submit and wait for validation
-    await act(async () => {
-      await user.click(submitButton)
-    })
+    // Submit and wait for validation - userEvent already handles act()
+    await user.click(submitButton)
 
     await waitFor(() => {
       // The exact message from our Zod schema
@@ -291,7 +287,7 @@ describe('EnrollmentForm', () => {
     await user.click(submitButton)
 
     await waitFor(() => {
-      expect(screen.getByText(/network error/i)).toBeInTheDocument()
+      expect(screen.getByText(/network error\. please check your connection and try again\./i)).toBeInTheDocument()
     }, { timeout: 5000 })
   }, 10000)
 
