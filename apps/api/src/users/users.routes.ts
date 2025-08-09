@@ -7,7 +7,7 @@ import { setPasswordSchema } from './users.validators'
 import bcrypt from 'bcryptjs'
 
 // Rate limiting for password setup attempts
-const passwordSetupAttempts = new Map<string, { count: number; lastAttempt: number }>()
+export const passwordSetupAttempts = new Map<string, { count: number; lastAttempt: number }>()
 const MAX_ATTEMPTS = 5
 const RATE_LIMIT_WINDOW = 15 * 60 * 1000 // 15 minutes
 

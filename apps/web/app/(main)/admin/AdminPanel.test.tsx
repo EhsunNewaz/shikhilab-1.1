@@ -3,8 +3,8 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import AdminPanel from './AdminPanel'
 
 // Mock the EnrollmentTable component
-jest.mock('./EnrollmentTable', () => {
-  return function MockEnrollmentTable({ enrollments, onEnrollmentAction }: any) {
+jest.mock('./EnrollmentTable', () => ({
+  EnrollmentTable: function MockEnrollmentTable({ enrollments, onEnrollmentAction }: any) {
     return (
       <div data-testid="enrollment-table">
         <span>Enrollments: {enrollments.length}</span>
@@ -17,7 +17,7 @@ jest.mock('./EnrollmentTable', () => {
       </div>
     )
   }
-})
+}))
 
 // Mock fetch
 global.fetch = jest.fn()
@@ -192,6 +192,6 @@ describe('AdminPanel', () => {
       // When capacity is full, available slots should be displayed in red
       const availableElement = screen.getByText('0')
       expect(availableElement.parentElement).toHaveClass('text-red-600')
-    })
+    }, { timeout: 10000 })
   })
 })

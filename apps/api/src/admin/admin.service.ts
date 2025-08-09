@@ -304,13 +304,16 @@ export class AdminService {
       let tokenEmail = ''
       let expiresAt = new Date()
       
-      if (result.rows.length > 0) {
+      if (result && result.rows && result.rows.length > 0) {
         const tokenData = result.rows[0]
-        // Use crypto.timingSafeEqual for constant-time comparison
-        const storedTokenHash = crypto.createHash('sha256').update(tokenData.token).digest('hex')
-        isValidToken = crypto.timingSafeEqual(Buffer.from(hashedToken), Buffer.from(storedTokenHash))
-        tokenEmail = tokenData.email
-        expiresAt = new Date(tokenData.expires_at)
+        // Check if token data exists and is valid
+        if (tokenData && tokenData.token) {
+          // Use crypto.timingSafeEqual for constant-time comparison
+          const storedTokenHash = crypto.createHash('sha256').update(tokenData.token).digest('hex')
+          isValidToken = crypto.timingSafeEqual(Buffer.from(hashedToken), Buffer.from(storedTokenHash))
+          tokenEmail = tokenData.email
+          expiresAt = new Date(tokenData.expires_at)
+        }
       }
 
       // Always check expiration, even for invalid tokens
