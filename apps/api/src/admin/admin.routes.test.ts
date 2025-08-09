@@ -1,8 +1,14 @@
 import request from 'supertest'
 import express from 'express'
-import { Pool } from 'pg'
 import { createAdminRoutes } from './admin.routes'
 import { createAuthMiddleware, requireRole } from '../auth/auth.middleware'
+import { 
+  createMockDatabase, 
+  mockDatabaseSuccess, 
+  mockDatabaseError,
+  mockEnrollmentData,
+  mockCapacityData
+} from '../test-utils/database-mocks'
 
 // Mock the auth middleware
 jest.mock('../auth/auth.middleware')
@@ -10,15 +16,7 @@ const mockCreateAuthMiddleware = createAuthMiddleware as jest.Mock
 const mockRequireRole = requireRole as jest.Mock
 
 // Mock database
-const mockDb = {
-  query: jest.fn(),
-  connect: jest.fn()
-} as unknown as Pool
-
-const mockClient = {
-  query: jest.fn(),
-  release: jest.fn()
-}
+const { mockDb, mockClient } = createMockDatabase()
 
 describe('Admin Routes', () => {
   let app: express.Application
@@ -43,18 +41,9 @@ describe('Admin Routes', () => {
 
   describe('GET /admin/enrollments', () => {
     it('should return pending enrollments', async () => {
-      const mockEnrollments = [
-        {
-          id: '123e4567-e89b-12d3-a456-426614174000',
-          full_name: 'John Doe',
-          email: 'john@example.com',
-          transaction_id: 'TXN123456789',
-          created_at: '2025-01-08T10:00:00Z',
-          course_title: 'IELTS Preparation Course'
-        }
-      ]
+      const mockEnrollments = [mockEnrollmentData]
 
-      ;(mockDb.query as jest.Mock).mockResolvedValue({ rows: mockEnrollments })
+      mockDatabaseSuccess(mockDb, mockEnrollments)
 
       const response = await request(app)
         .get('/admin/enrollments')
@@ -66,7 +55,7 @@ describe('Admin Routes', () => {
     })
 
     it('should handle database errors', async () => {
-      (mockDb.query as jest.Mock).mockRejectedValue(new Error('Database error'))
+      mockDatabaseError(mockDb, new Error('Database error'))
 
       const response = await request(app)
         .get('/admin/enrollments')
@@ -79,13 +68,7 @@ describe('Admin Routes', () => {
 
   describe('GET /admin/dashboard', () => {
     it('should return capacity information', async () => {
-      const mockCapacity = {
-        total_capacity: '50',
-        current_approved: '20',
-        current_pending: '5'
-      }
-
-      ;(mockDb.query as jest.Mock).mockResolvedValue({ rows: [mockCapacity] })
+      mockDatabaseSuccess(mockDb, [mockCapacityData])
 
       const response = await request(app)
         .get('/admin/dashboard')

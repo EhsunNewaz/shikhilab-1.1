@@ -17,7 +17,8 @@
       "Bash(chmod:*)",
       "Bash(docker:*)",
       "Bash(npx turbo test:*)",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "Bash(npx jest:*)"
     ],
     "deny": []
   }

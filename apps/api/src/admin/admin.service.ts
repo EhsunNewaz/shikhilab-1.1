@@ -31,7 +31,7 @@ export class AdminService {
     `
     
     const result = await this.db.query(query)
-    return result.rows
+    return result?.rows || []
   }
 
   async getEnrollmentCapacityInfo(courseId?: string): Promise<EnrollmentCapacity> {
@@ -63,6 +63,14 @@ export class AdminService {
     }
 
     const result = await this.db.query(capacityQuery, queryParams)
+    if (!result || !result.rows || result.rows.length === 0) {
+      return {
+        total_capacity: 0,
+        current_approved: 0,
+        current_pending: 0,
+        available_slots: 0
+      }
+    }
     const row = result.rows[0]
 
     const totalCapacity = parseInt(row.total_capacity) || 0
@@ -90,7 +98,7 @@ export class AdminService {
         [enrollmentId, 'pending']
       )
 
-      if (enrollmentResult.rows.length === 0) {
+      if (!enrollmentResult || !enrollmentResult.rows || enrollmentResult.rows.length === 0) {
         await client.query('ROLLBACK')
         return { success: false, error: 'Enrollment not found or already processed' }
       }
@@ -112,7 +120,7 @@ export class AdminService {
 
       let userId: string
 
-      if (existingUser.rows.length > 0) {
+      if (existingUser && existingUser.rows && existingUser.rows.length > 0) {
         userId = existingUser.rows[0].id
         
         // Update enrollment status
@@ -247,7 +255,7 @@ export class AdminService {
         [enrollmentId, 'pending']
       )
 
-      if (checkResult.rows.length === 0) {
+      if (!checkResult || !checkResult.rows || checkResult.rows.length === 0) {
         return { success: false, error: 'Enrollment not found or already processed' }
       }
 
@@ -393,6 +401,10 @@ export class AdminService {
       let processed = 0
       let succeeded = 0
       let failed = 0
+
+      if (!result || !result.rows) {
+        return { processed: 0, succeeded: 0, failed: 0 }
+      }
 
       for (const attempt of result.rows) {
         processed++

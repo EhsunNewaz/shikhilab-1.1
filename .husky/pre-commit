@@ -6,7 +6,7 @@ npm run lint
 npm run type-check
 
 # Run tests to ensure they pass
-# Temporarily disabled to allow git operations while fixing test issues
+# Temporarily disabled - 20 tests still failing, need further fixes
 # npm run test
 
 echo "✅ Pre-commit checks passed!"
